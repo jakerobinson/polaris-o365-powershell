@@ -42,8 +42,10 @@ The following commands are available in the module:
 * `Get-PolarisToken`
 * `Get-PolarisSLA`
 * `Get-PolarisO365Subscriptions`
-* `Get-PolarisO365Users`
-* `Get-PolarisO365User`
+* `Get-PolarisO365MailboxUsers`
+* `Get-PolarisO365MailboxUser`
+* `Get-PolarisO365OneDriveUsers`
+* `Get-PolarisO365OneDriveUser`
 * `Set-PolarisO365ObjectSla`
 
 Each command has help which describes their usage and parameters, these can be seen using the `Get-Help <command>` command within PowerShell.
@@ -72,10 +74,16 @@ $my_sub = $all_subs | ?{$_.name -eq $sub_name}
 # get our SLA domain
 $my_sla = Get-PolarisSLA -Token $token -PolarisURL $url -Name $sla_name
 
-# get our user
-$my_user = Get-PolarisO365User -Token $token -PolarisURL $url -SubscriptionId $my_sub.id -SearchString 'arif'
+# get our mailbox user
+$my_user = Get-PolarisO365MailboxUser -Token $token -PolarisURL $url -SubscriptionId $my_sub.id -SearchString 'arif'
 
-# set the SLA domain for our user
+# set the SLA domain for our mailbox user
+Set-PolarisO365ObjectSla -Token $token -PolarisURL $url -ObjectID $my_user.id -SLAID $my_sla.id
+
+# get our OneDrive user
+$my_user = Get-PolarisO365OnedriveUser -Token $token -PolarisURL $url -SubscriptionId $my_sub.id -SearchString 'arif'
+
+# set the SLA domain for our OneDrive user
 Set-PolarisO365ObjectSla -Token $token -PolarisURL $url -ObjectID $my_user.id -SLAID $my_sla.id
 
 # or set the SLA domain of our subscription
@@ -84,7 +92,7 @@ Set-PolarisO365ObjectSla -Token $token -PolarisURL $url -ObjectID $my_sub.id -SL
 
 ## Bulk Assignment Use-case
 
-We can bulk assign SLAs to O365 accounts, if for example we want to do a staggered migration. The following code can be used to do this:
+We can bulk assign SLAs to O365 Mailbox accounts, if for example we want to do a staggered migration. The following code can be used to do this:
 
 ```powershell
 $token = Get-PolarisToken -Username $username -Password $password -PolarisURL $url
@@ -92,7 +100,7 @@ $all_orgs = Get-PolarisO365Subscriptions -Token $token -PolarisURL $url
 $my_org = $all_orgs | ?{$_.name -eq $org_name}
 $all_slas = Get-PolarisSLA -Token $token -PolarisURL $url
 $my_sla = $all_slas | ?{$_.name -eq 'Gold'}
-$all_users = Get-PolarisO365Users -Token $token -PolarisURL $url -SubscriptionId $my_org.id
+$all_users = Get-PolarisO365MailboxUsers -Token $token -PolarisURL $url -SubscriptionId $my_org.id
 $500_users = $all_users | select -First 500
 $assign = Set-PolarisO365ObjectSla -Token $token -PolarisURL $url -ObjectID $500_users.id -SlaID $my_sla.id
 ```
@@ -103,4 +111,4 @@ The key line here is this:
 $500_users = $all_users | select -First 500
 ```
 
-Here we are just picking the first 500 accounts, but more specific selection could be achieved using standard PowerShell filtering on the `$all_users` array.
+Here we are just picking the first 500 accounts, but more specific selection could be achieved using standard PowerShell filtering on the `$all_users` array. We could also replace the `Get-PolarisO365MailboxUsers` cmdlet with `Get-PolarisO365OneDriveUsers` to select OneDrive accounts rather than Mailbox accounts.

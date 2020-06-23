@@ -340,9 +340,9 @@ function Get-PolarisO365MailboxUsers() {
     $node_array = @()
 
     $payload = @{
-        "operationName" = "O365UserList";
-        "query" = "query O365UserList(`$first: Int!, `$after: String, `$id: UUID!, `$filter: [Filter!]!, `$sortBy: HierarchySortByField, `$sortOrder: HierarchySortOrder) {
-            o365Org(fid: `$id) {
+        "operationName" = "O365UserListQuery";
+        "query" = "query O365UserListQuery(`$first: Int!, `$after: String, `$orgId: UUID!, `$filter: [Filter!]!, `$sortBy: HierarchySortByField, `$sortOrder: HierarchySortOrder) {
+            o365Org(fid: `$orgId) {
                 id
                 childConnection(first: `$first, filter: `$filter, sortBy: `$sortBy, sortOrder: `$sortOrder, after: `$after) {
                     edges {
@@ -351,20 +351,10 @@ function Get-PolarisO365MailboxUsers() {
                             name
                             emailAddress
                             effectiveSlaDomain {
+                                id
                                 name
                             }
-                            authorizedOperations {
-                                id
-                                operations
-                                __typename
-                            }
-                            childConnection(filter: []) {
-                                nodes {
-                                    id
-                                    name
-                                    objectType
-                                }
-                            }
+                            authorizedOperations
                             slaAssignment
                         }
                     }
@@ -385,7 +375,7 @@ function Get-PolarisO365MailboxUsers() {
                 };
             )
             "first" = 100;
-            "id" = $SubscriptionId;
+            "orgId" = $SubscriptionId;
             "sortBy" = "EMAIL_ADDRESS";
             "sortOrder" = "ASC";
         }
@@ -491,10 +481,7 @@ function Get-PolarisO365OneDriveUsers() {
                             name
 
                         }
-                        authorizedOperations {
-                            id
-                            operations
-                        }
+                        authorizedOperations
                         slaAssignment
                     }
                 }
@@ -544,6 +531,7 @@ function Get-PolarisO365OneDriveUsers() {
 
     return $user_details
 }
+
 function Get-PolarisO365MailboxUser() {
     <#
     .SYNOPSIS
@@ -612,9 +600,9 @@ function Get-PolarisO365MailboxUser() {
     $node_array = @()
 
     $payload = @{
-        "operationName" = "O365UserList";
+        "operationName" = "O365UserListQuery";
         "variables" = @{
-            "id" = $SubscriptionId;
+            "orgId" = $SubscriptionId;
             "first" = 100;
             "filter" = @(
                 @{
@@ -629,8 +617,8 @@ function Get-PolarisO365MailboxUser() {
             "sortBy" = "EMAIL_ADDRESS";
             "sortOrder" = "ASC";
         };
-        "query" = "query O365UserList(`$first: Int!, `$after: String, `$id: UUID!, `$filter: [Filter!]!, `$sortBy: HierarchySortByField, `$sortOrder: HierarchySortOrder) {
-            o365Org(fid: `$id) {
+        "query" = "query O365UserListQuery(`$first: Int!, `$after: String, `$orgId: UUID!, `$filter: [Filter!]!, `$sortBy: HierarchySortByField, `$sortOrder: HierarchySortOrder) {
+            o365Org(fid: `$orgId) {
                 id
                 childConnection(first: `$first, filter: `$filter, sortBy: `$sortBy, sortOrder: `$sortOrder, after: `$after) {
                     edges {
@@ -641,10 +629,7 @@ function Get-PolarisO365MailboxUser() {
                             effectiveSlaDomain {
                                 name
                             }
-                            authorizedOperations {
-                                id
-                                operations
-                            }
+                            authorizedOperations
                             childConnection(filter: []) {
                                 nodes {
                                     id
@@ -770,10 +755,7 @@ function Get-PolarisO365OneDriveUser() {
                             name
 
                         }
-                        authorizedOperations {
-                            id
-                            operations
-                        }
+                        authorizedOperations
                         slaAssignment
                     }
                 }

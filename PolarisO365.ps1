@@ -240,6 +240,8 @@ function Get-PolarisO365Subscriptions {
                     id
                     status
                     name
+                    past1DayMailboxComplianceCount
+                    past1DayOnedriveComplianceCount
                     effectiveSlaDomain {
                         name
                         id
@@ -261,7 +263,7 @@ function Get-PolarisO365Subscriptions {
 
         $response = Invoke-RestMethod -Method POST -Uri $endpoint -Body $($payload | ConvertTo-JSON -Depth 100) -Headers $headers
 
-        $row = '' | Select-Object name, id, status, usersCount, unprotectedUsersCount, effectiveSlaDomainName, configuredSlaDomainName, effectiveSlaDomainId, configuredSlaDomainId
+        $row = '' | Select-Object name, id, status, usersCount, unprotectedUsersCount, effectiveSlaDomainName, configuredSlaDomainName, effectiveSlaDomainId, configuredSlaDomainId, past1DayOnedriveComplianceCount, past1DayMailboxComplianceCount
         $row.name = $response.data.o365Org.name
         $row.id = $response.data.o365Org.id
         $row.status = $response.data.o365Org.status
@@ -271,6 +273,8 @@ function Get-PolarisO365Subscriptions {
         $row.configuredSlaDomainName = $response.data.o365Org.configuredSlaDomain.name
         $row.effectiveSlaDomainId = $response.data.o365Org.effectiveSlaDomain.id
         $row.configuredSlaDomainId = $response.data.o365Org.effectiveSlaDomain.name
+        $row.past1DayOnedriveComplianceCount = $response.data.o365Org.past1DayOnedriveComplianceCount
+        $row.past1DayMailboxComplianceCount = $response.data.o365Org.past1DayMailboxComplianceCount
         $org_details += $row
     }
 

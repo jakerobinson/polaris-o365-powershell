@@ -127,6 +127,7 @@ function Get-PolarisSLA() {
     }
 
     $response = Invoke-RestMethod -Method POST -Uri $endpoint -Body $($payload | ConvertTo-JSON -Depth 100) -Headers $headers
+    Write-Host ($response | ConvertTo-Json -Depth 10)
 
     $sla_detail = @()
 
@@ -220,14 +221,12 @@ function Get-PolarisO365Subscriptions {
             "first" = $null;
         }
     }
-
     $response = Invoke-RestMethod -Method POST -Uri $endpoint -Body $($payload | ConvertTo-JSON -Depth 100) -Headers $headers
-
     $org_ids = @()
     foreach ($org in $response.data.o365Orgs.edges) {
         $org_ids += $org.node.id
     }
-
+    Write-Host ($response | ConvertTo-Json -Depth 10)
     # For each org let's get the details
 
     $org_details = @()
@@ -260,7 +259,6 @@ function Get-PolarisO365Subscriptions {
         }
 
         $response = Invoke-RestMethod -Method POST -Uri $endpoint -Body $($payload | ConvertTo-JSON -Depth 100) -Headers $headers
-
         $row = '' | Select-Object name, id, status, usersCount, unprotectedUsersCount, effectiveSlaDomainName, configuredSlaDomainName, effectiveSlaDomainId, configuredSlaDomainId
         $row.name = $response.data.o365Org.name
         $row.id = $response.data.o365Org.id
@@ -272,6 +270,7 @@ function Get-PolarisO365Subscriptions {
         $row.effectiveSlaDomainId = $response.data.o365Org.effectiveSlaDomain.id
         $row.configuredSlaDomainId = $response.data.o365Org.effectiveSlaDomain.name
         $org_details += $row
+        Write-Host ($response | ConvertTo-Json -Depth 10)
     }
 
     return $org_details
@@ -377,11 +376,13 @@ function Get-PolarisO365Mailboxes() {
     }
     $response = Invoke-RestMethod -Method POST -Uri $endpoint -Body $($payload | ConvertTo-JSON -Depth 100) -Headers $headers
     $node_array += $response.data.o365Mailboxes.edges
+    Write-Host ($response | ConvertTo-Json -Depth 10)
     # get all pages of results
     while ($response.data.o365Mailboxes.pageInfo.hasNextPage) {
         $payload.variables.after = $response.data.o365Mailboxes.pageInfo.endCursor
         $response = Invoke-RestMethod -Method POST -Uri $endpoint -Body $($payload | ConvertTo-JSON -Depth 100) -Headers $headers
         $node_array += $response.data.o365Mailboxes.edges
+        Write-Host ($response | ConvertTo-Json -Depth 10)
     }
 
     $mailbox_details = @()
@@ -497,7 +498,7 @@ function Get-PolarisO365OneDrives() {
         $response = Invoke-RestMethod -Method POST -Uri $endpoint -Body $($payload | ConvertTo-JSON -Depth 100) -Headers $headers
         $node_array += $response.data.o365Onedrives.edges
     }
-
+    Write-Host ($response | ConvertTo-Json -Depth 10)
     $user_details = @()
 
     foreach ($node in $node_array) {
@@ -629,7 +630,7 @@ function Get-PolarisO365Mailbox() {
         $response = Invoke-RestMethod -Method POST -Uri $endpoint -Body $($payload | ConvertTo-JSON -Depth 100) -Headers $headers
         $node_array += $response.data.o365Mailboxes.edges
     }
-
+    Write-Host ($response | ConvertTo-Json -Depth 10)
     $mailbox_details = @()
 
     foreach ($node in $node_array) {
@@ -750,7 +751,7 @@ function Get-PolarisO365OneDrive() {
         $response = Invoke-RestMethod -Method POST -Uri $endpoint -Body $($payload | ConvertTo-JSON -Depth 100) -Headers $headers
         $node_array += $response.data.o365Onedrives.edges
     }
-
+    Write-Host ($response | ConvertTo-Json -Depth 10)
     $user_details = @()
 
     foreach ($node in $node_array) {
@@ -896,6 +897,7 @@ function Get-PolarisO365SharePoint() {
  
         $response = Invoke-RestMethod -Method POST -Uri $endpoint -Body $($payload | ConvertTo-JSON -Depth 100) -Headers $headers
         $o365Sites = $response.data.o365Sites
+        Write-Host ($response | ConvertTo-Json -Depth 10)
     } elseif ($Includes -eq "DocumentLibrariesOnly") {
         $payload.query = "query O365SharepointQuery(`$after: String, `$o365OrgId:UUID!, `$filter: [Filter!], `$first: Int!, `$sortBy: HierarchySortByField, `$sortOrder: HierarchySortOrder) {
             $($queryDrives)
@@ -903,6 +905,7 @@ function Get-PolarisO365SharePoint() {
 
         $response = Invoke-RestMethod -Method POST -Uri $endpoint -Body $($payload | ConvertTo-JSON -Depth 100) -Headers $headers
         $o365SharepointDrives = $response.data.o365SharepointDrives
+        Write-Host ($response | ConvertTo-Json -Depth 10)
     } else {
         $payload.query = "query O365SharepointQuery(`$after: String, `$o365OrgId:UUID!, `$filter: [Filter!], `$first: Int!, `$sortBy: HierarchySortByField, `$sortOrder: HierarchySortOrder) {
             $($querySites)
@@ -912,6 +915,7 @@ function Get-PolarisO365SharePoint() {
         $response = Invoke-RestMethod -Method POST -Uri $endpoint -Body $($payload | ConvertTo-JSON -Depth 100) -Headers $headers
         $o365Sites = $response.data.o365Sites
         $o365SharepointDrives = $response.data.o365SharepointDrives
+        Write-Host ($response | ConvertTo-Json -Depth 10)
      }
 
      $node_array += @()
@@ -924,6 +928,7 @@ function Get-PolarisO365SharePoint() {
             $response = Invoke-RestMethod -Method POST -Uri $endpoint -Body $($payload | ConvertTo-JSON -Depth 100) -Headers $headers
             $o365Sites = $response.data.o365Sites
             $node_array += $o365Sites.nodes
+            Write-Host ($response | ConvertTo-Json -Depth 10)
         }
     }
 
@@ -934,6 +939,7 @@ function Get-PolarisO365SharePoint() {
             $response = Invoke-RestMethod -Method POST -Uri $endpoint -Body $($payload | ConvertTo-JSON -Depth 100) -Headers $headers
             $o365SharepointDrives = $response.data.o365SharepointDrives
             $node_array += $o365SharepointDrives.nodes
+            Write-Host ($response | ConvertTo-Json -Depth 10)
         }
     }
 

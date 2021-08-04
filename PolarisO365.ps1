@@ -1052,3 +1052,109 @@ function Set-PolarisO365ObjectSla() {
         throw 'Issue assigning SLA domain to object'
     }
 }
+
+function New-PolarisO365MailboxSnapshot() {
+    <#
+    .SYNOPSIS
+
+    Creates an on-demand snapshot for an O365 Mailbox
+
+    .DESCRIPTION
+
+    Creates an on-demand snapshot for a Microsoft Office 365 Mailbox. 
+
+    .PARAMETER Token
+    Polaris API Token.
+
+    .PARAMETER PolarisURL
+    The URL for the Polaris instance in the form 'https://myurl'
+
+    .PARAMETER MailboxId
+    The Mailbox ID for an O365 user or subscription. Can be obtained using 'Get-PolarisO365Mailbox' or 'Get-PolarisO365Mailboxes'
+
+    .INPUTS
+
+    None. You cannot currently pipe objects into New-PolarisO365MailboxSnapshot.
+
+    .OUTPUTS
+
+    GraphQL response object
+
+    .EXAMPLE
+
+    PS> New-PolarisO365MailboxSnapshot -Token $token -PolarisURL $url -MailboxId $my_mailbox.id
+    #>
+
+    param(
+        [Parameter(Mandatory = $True)]
+        [String]$Token,
+        [Parameter(Mandatory = $True)]
+        [String]$PolarisURL,
+        [Parameter(Mandatory = $True)]
+        [String[]]$MailboxID
+    )
+
+    $headers = @{
+        'Content-Type'  = 'application/json';
+        'Accept'        = 'application/json';
+        'Authorization' = $('Bearer ' + $Token);
+    }
+
+    $endpoint = $PolarisURL + '/api/graphql'
+
+
+    $payload = @{
+        "operationName" = "TakeO365MailboxSnapshotMutation";
+        "variables" = @{
+            "mailboxId" = $($mailboxId);
+        };
+        "query" = "mutation TakeO365MailboxSnapshotMutation(`$mailboxId: UUID!) {
+            backupO365Mailbox(mailboxId: `$mailboxId) {
+              taskchainId
+            }
+          }";
+    }
+
+
+    Invoke-RestMethod -Method POST -Uri $endpoint -Body $($payload | ConvertTo-JSON -Depth 100) -Headers $headers
+
+}
+
+function Get-PolarisAzureCloudAccountTenants {
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory = $True)]
+        [String]$Token,
+        [Parameter(Mandatory = $True)]
+        [String]$PolarisURL
+    )
+    
+    process {
+        $headers = @{
+            'Content-Type'  = 'application/json';
+            'Accept'        = 'application/json';
+            'Authorization' = $('Bearer ' + $Token);
+        }
+    
+        $endpoint = $PolarisURL + '/api/graphql'
+    
+    
+        $payload = @{
+            "variables" = @{
+                "mailboxId" = $($mailboxId);
+            };
+            "query" = "mutation TakeO365MailboxSnapshotMutation(`$mailboxId: UUID!) {
+                backupO365Mailbox(mailboxId: `$mailboxId) {
+                  taskchainId
+                }
+              }";
+        }
+    
+    
+        Invoke-RestMethod -Method POST -Uri $endpoint -Body $($payload | ConvertTo-JSON -Depth 100) -Headers $headers
+    }
+    
+}
+
+
+  
